@@ -21,10 +21,11 @@ class DatabaseHelper {
   Future<Database> initDB() async {
     String path = join(await getDatabasesPath(), 'main_db.db');
     return await openDatabase(
-      path,
-      version: 1,
-      onCreate: _onCreate,
-    );
+    path,
+    version: 2,
+    onCreate: _onCreate,
+    onUpgrade: _onUpgrade,
+);
   }
 
   // Create table structure
@@ -36,6 +37,13 @@ class DatabaseHelper {
       await db.execute(
       "CREATE TABLE Locations (id INTEGER PRIMARY KEY, name TEXT, link TEXT)");
   }
+
+  Future _onUpgrade(Database db, int oldVersion, int newVersion) async {
+  if (oldVersion < 2) {
+    await db.execute("ALTER TABLE Planned ADD COLUMN notes TEXT");
+    await db.execute("ALTER TABLE Planned ADD COLUMN created_at TEXT");
+  }
+}
 
   //Insert purchases
   Future<int> insertPurchase(Purchase purchase) async {
@@ -69,5 +77,20 @@ class DatabaseHelper {
       Database db = await instance.database;
       final List<Map<String, dynamic>> maps = await db.query('Locations');
       return List.generate(maps.length, (i) => Location.fromMap(maps[i]));
+  }
+
+  Future<int> deletePlanned(int id) async {
+  Database db = await instance.database;
+  return await db.delete('Planned', where: 'id = ?', whereArgs: [id]);
+}
+
+  Future<int> updatePlannedMood(int id, String mood) async {
+    Database db = await instance.database;
+    return await db.update(
+      'Planned',
+      {'mood': mood},
+      where: 'id = ?',
+      whereArgs: [id],
+    );
   }
 }
