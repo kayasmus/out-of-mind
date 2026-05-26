@@ -1,12 +1,7 @@
 import 'package:flutter/material.dart';
 import '../db/database_helper.dart';
 import '../models/planned_purchase.dart';
-
-const Map<String, String> moodEmojis = {
-  'Happy': '😊', 'Sad': '😢', 'Euphoric': '🤩',
-  'Sleepy': '😴', 'Drunk': '🥴', 'Angry': '😠',
-  'Lonely': '😔', 'Bored': '😑', 'Anxious': '😰',
-};
+import '../constants/mood_emojis.dart';
 
 class AddPlannedScreen extends StatefulWidget {
   const AddPlannedScreen({super.key});
