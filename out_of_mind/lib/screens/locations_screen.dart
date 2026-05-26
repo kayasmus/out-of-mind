@@ -47,7 +47,7 @@ class _LocationsScreenState extends State<LocationsScreen> {
                   child: ExpansionTile(
                     title: Text(location),
                     subtitle: Text(
-                      '${purchases.length} purchase${purchases.length == 1 ? '' : 's'} · \$${total.toStringAsFixed(2)} total',
+                      '${purchases.length} purchase${purchases.length == 1 ? '' : 's'} · ¥${total.toStringAsFixed(2)} total',
                     ),
                     children: purchases.map((p) {
                       final emoji = {
@@ -61,7 +61,7 @@ class _LocationsScreenState extends State<LocationsScreen> {
                         subtitle: Text(p.date.length > 16
                             ? p.date.substring(0, 16)
                             : p.date),
-                        trailing: Text('\$${p.amount?.toStringAsFixed(2)}'),
+                        trailing: Text('¥${p.amount?.toStringAsFixed(2)}'),
                       );
                     }).toList(),
                   ),

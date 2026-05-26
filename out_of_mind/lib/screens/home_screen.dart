@@ -83,7 +83,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 title: Text(p.mood),
                 subtitle: Text(p.date.length > 16 ? p.date.substring(0, 16) : p.date),
                 trailing: Text(
-                  '\$${p.amount?.toStringAsFixed(2)}',
+                  '¥${p.amount?.toStringAsFixed(2)}',
                   style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
               ),

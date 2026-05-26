@@ -3,6 +3,7 @@ import '../db/database_helper.dart';
 import '../models/planned_purchase.dart';
 import 'add_planned_screen.dart';
 import '../constants/mood_emojis.dart';
+import '../services/notification_service.dart';
 
 class PlannedScreen extends StatefulWidget {
   const PlannedScreen({super.key});
@@ -114,7 +115,7 @@ class _PlannedScreenState extends State<PlannedScreen> {
                                           fontSize: 18,
                                           fontWeight: FontWeight.bold)),
                                   if (p.amount != null)
-                                    Text('\$${p.amount!.toStringAsFixed(2)}',
+                                    Text('¥${p.amount!.toStringAsFixed(2)}',
                                         style: const TextStyle(fontSize: 15)),
                                 ],
                               ),
@@ -150,10 +151,10 @@ class _PlannedScreenState extends State<PlannedScreen> {
                               icon: const Icon(Icons.delete_outline,
                                   color: Colors.red),
                               onPressed: () async {
-                                await DatabaseHelper.instance
-                                    .deletePlanned(p.id!);
-                                _load();
-                              },
+                            await DatabaseHelper.instance.deletePlanned(p.id!);
+                            await NotificationService.cancelReminder(p.id!);
+                                  _load();
+                            },
                             ),
                           ],
                         ),

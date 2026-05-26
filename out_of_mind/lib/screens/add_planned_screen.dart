@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../db/database_helper.dart';
 import '../models/planned_purchase.dart';
 import '../constants/mood_emojis.dart';
+import '../services/notification_service.dart';
 
 class AddPlannedScreen extends StatefulWidget {
   const AddPlannedScreen({super.key});
@@ -27,23 +28,28 @@ class _AddPlannedScreenState extends State<AddPlannedScreen> {
     if (picked != null) setState(() => reminderDate = picked);
   }
 
-  Future<void> _save() async {
-    if (selectedMood == null || nameController.text.isEmpty) return;
+ Future<void> _save() async {
+  if (selectedMood == null || nameController.text.isEmpty) return;
 
-    final planned = PlannedPurchase(
-      name: nameController.text,
-      amount: amountController.text.isNotEmpty
-          ? double.tryParse(amountController.text)
-          : null,
-      mood: selectedMood!,
-      notes: notesController.text.isNotEmpty ? notesController.text : null,
-      reminderDate: reminderDate?.toString(),
-      createdAt: DateTime.now().toString(),
-    );
+  final planned = PlannedPurchase(
+    name: nameController.text,
+    amount: amountController.text.isNotEmpty
+        ? double.tryParse(amountController.text.replaceAll(',', ''))
+        : null,
+    mood: selectedMood!,
+    notes: notesController.text.isNotEmpty ? notesController.text : null,
+    reminderDate: reminderDate?.toString(),
+    createdAt: DateTime.now().toString(),
+  );
 
-    await DatabaseHelper.instance.insertPlanned(planned);
-    if (mounted) Navigator.pop(context);
+  final id = await DatabaseHelper.instance.insertPlanned(planned);
+
+  if (reminderDate != null) {
+    await NotificationService.scheduleReminder(id, planned.name, reminderDate!);
   }
+
+  if (mounted) Navigator.pop(context);
+}
 
   @override
   Widget build(BuildContext context) {
