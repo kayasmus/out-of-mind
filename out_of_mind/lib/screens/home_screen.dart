@@ -4,6 +4,7 @@ import '../models/purchase.dart';
 import 'add_purchase_screen.dart';
 import 'locations_screen.dart';
 import 'planned_screen.dart';
+import '../services/currency_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -83,9 +84,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 title: Text(p.mood),
                 subtitle: Text(p.date.length > 16 ? p.date.substring(0, 16) : p.date),
                 trailing: Text(
-                  '¥${p.amount?.toStringAsFixed(2)}',
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
+  CurrencyService.format(p.amount),
+  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+),
               ),
             );
           },

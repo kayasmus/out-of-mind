@@ -3,6 +3,7 @@ import 'package:geolocator/geolocator.dart';
 import '../db/database_helper.dart';
 import '../models/purchase.dart';
 import '../constants/mood_emojis.dart';
+import '../services/currency_service.dart';
 
 class AddPurchaseScreen extends StatefulWidget {
   const AddPurchaseScreen({super.key});
@@ -35,11 +36,14 @@ class _AddPurchaseScreenState extends State<AddPurchaseScreen> {
   Future<void> _savePurchase() async {
     if (selectedMood == null || amountController.text.isEmpty) return;
 
-    final location = await _getLocation();
+    final location = await _getLocation().timeout(
+    const Duration(seconds: 5),
+    onTimeout: () => 'Location unavailable',
+    );
 
     final purchase = Purchase(
       mood: selectedMood!,
-      amount: double.parse(amountController.text),
+      amount: CurrencyService.parse(amountController.text) ?? 0,
       location: location,
       date: DateTime.now().toString(),
     );

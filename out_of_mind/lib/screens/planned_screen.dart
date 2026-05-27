@@ -4,6 +4,7 @@ import '../models/planned_purchase.dart';
 import 'add_planned_screen.dart';
 import '../constants/mood_emojis.dart';
 import '../services/notification_service.dart';
+import '../services/currency_service.dart';
 
 class PlannedScreen extends StatefulWidget {
   const PlannedScreen({super.key});
@@ -115,8 +116,8 @@ class _PlannedScreenState extends State<PlannedScreen> {
                                           fontSize: 18,
                                           fontWeight: FontWeight.bold)),
                                   if (p.amount != null)
-                                    Text('¥${p.amount!.toStringAsFixed(2)}',
-                                        style: const TextStyle(fontSize: 15)),
+  Text(CurrencyService.format(p.amount),
+      style: const TextStyle(fontSize: 15)),
                                 ],
                               ),
                             ),

@@ -3,6 +3,7 @@ import '../db/database_helper.dart';
 import '../models/planned_purchase.dart';
 import '../constants/mood_emojis.dart';
 import '../services/notification_service.dart';
+import '../services/currency_service.dart';
 
 class AddPlannedScreen extends StatefulWidget {
   const AddPlannedScreen({super.key});
@@ -34,8 +35,8 @@ class _AddPlannedScreenState extends State<AddPlannedScreen> {
   final planned = PlannedPurchase(
     name: nameController.text,
     amount: amountController.text.isNotEmpty
-        ? double.tryParse(amountController.text.replaceAll(',', ''))
-        : null,
+    ? CurrencyService.parse(amountController.text)
+    : null,
     mood: selectedMood!,
     notes: notesController.text.isNotEmpty ? notesController.text : null,
     reminderDate: reminderDate?.toString(),

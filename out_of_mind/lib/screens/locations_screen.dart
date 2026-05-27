@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../db/database_helper.dart';
 import '../models/purchase.dart';
+import '../services/currency_service.dart';
+import '../constants/mood_emojis.dart';
 
 class LocationsScreen extends StatefulWidget {
   const LocationsScreen({super.key});
@@ -47,21 +49,17 @@ class _LocationsScreenState extends State<LocationsScreen> {
                   child: ExpansionTile(
                     title: Text(location),
                     subtitle: Text(
-                      '${purchases.length} purchase${purchases.length == 1 ? '' : 's'} · ¥${total.toStringAsFixed(2)} total',
+                      '${purchases.length} purchase${purchases.length == 1 ? '' : 's'} · ${CurrencyService.format(total)} total',
                     ),
                     children: purchases.map((p) {
-                      final emoji = {
-                        'Happy': '😊', 'Sad': '😢', 'Euphoric': '🤩',
-                        'Sleepy': '😴', 'Drunk': '🥴', 'Angry': '😠',
-                        'Lonely': '😔', 'Bored': '😑', 'Anxious': '😰',
-                      }[p.mood] ?? '❓';
+                      final emoji = moodEmojis[p.mood] ?? '❓';
                       return ListTile(
                         leading: Text(emoji, style: const TextStyle(fontSize: 24)),
                         title: Text(p.mood),
                         subtitle: Text(p.date.length > 16
                             ? p.date.substring(0, 16)
                             : p.date),
-                        trailing: Text('¥${p.amount?.toStringAsFixed(2)}'),
+                        trailing: Text(CurrencyService.format(p.amount)),
                       );
                     }).toList(),
                   ),
