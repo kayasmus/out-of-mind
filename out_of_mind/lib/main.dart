@@ -26,6 +26,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Out of Mind',
+      debugShowCheckedModeBanner: false,
       home: showCurrencySelection
       ? const CurrencySelectionScreen()
       : const HomeScreen(),

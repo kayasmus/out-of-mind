@@ -4,6 +4,7 @@ import '../db/database_helper.dart';
 import '../models/purchase.dart';
 import '../constants/mood_emojis.dart';
 import '../services/currency_service.dart';
+import 'package:geocoding/geocoding.dart';
 
 class AddPurchaseScreen extends StatefulWidget {
   const AddPurchaseScreen({super.key});
@@ -17,21 +18,41 @@ class _AddPurchaseScreenState extends State<AddPurchaseScreen> {
   final TextEditingController amountController = TextEditingController();
 
   Future<String> _getLocation() async {
-    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) return 'Location off';
+  bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+  if (!serviceEnabled) return 'Location off';
 
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) return 'Permission denied';
-    }
-    if (permission == LocationPermission.deniedForever) return 'Permission denied';
+  LocationPermission permission = await Geolocator.checkPermission();
+  if (permission == LocationPermission.denied) {
+    permission = await Geolocator.requestPermission();
+    if (permission == LocationPermission.denied) return 'Permission denied';
+  }
+  if (permission == LocationPermission.deniedForever) return 'Permission denied';
 
-    final position = await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.medium,
+  final position = await Geolocator.getCurrentPosition(
+  locationSettings: const LocationSettings(
+    accuracy: LocationAccuracy.medium,
+  ),
+);
+
+  try {
+    final placemarks = await placemarkFromCoordinates(
+      position.latitude,
+      position.longitude,
     );
+    if (placemarks.isNotEmpty) {
+      final place = placemarks.first;
+      final parts = [place.street, place.locality]
+          .where((s) => s != null && s.isNotEmpty)
+          .toList();
+      return parts.isNotEmpty ? parts.join(', ') :
+          '${position.latitude.toStringAsFixed(4)}, ${position.longitude.toStringAsFixed(4)}';
+    }
+  } catch (_) {
     return '${position.latitude.toStringAsFixed(4)}, ${position.longitude.toStringAsFixed(4)}';
   }
+
+  return 'Unknown';
+}
 
   Future<void> _savePurchase() async {
     if (selectedMood == null || amountController.text.isEmpty) return;
