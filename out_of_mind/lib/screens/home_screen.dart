@@ -6,6 +6,7 @@ import 'locations_screen.dart';
 import 'planned_screen.dart';
 import '../services/currency_service.dart';
 import 'settings_screen.dart';
+import 'reflection_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -44,16 +45,25 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
   title: const Text("Home Screen"),
   actions: [
-    IconButton(
-      icon: const Icon(Icons.settings),
-      onPressed: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => const SettingsScreen()),
-        );
-      },
-    ),
-  ],
+  IconButton(
+    icon: const Icon(Icons.calendar_month),
+    onPressed: () {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const ReflectionScreen()),
+      );
+    },
+  ),
+  IconButton(
+    icon: const Icon(Icons.settings),
+    onPressed: () {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const SettingsScreen()),
+      );
+    },
+  ),
+],
 ),
       body: Padding(
         padding: const EdgeInsets.all(16),
