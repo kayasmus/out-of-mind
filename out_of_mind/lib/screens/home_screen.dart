@@ -17,6 +17,14 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   List<Purchase> _purchases = [];
 
+  Color _impulseColor(int value) {
+  if (value <= 1) return Colors.green;
+  if (value <= 2) return Colors.lightGreen;
+  if (value <= 3) return Colors.orange;
+  if (value <= 4) return Colors.deepOrange;
+  return Colors.red;
+}
+
   @override
   void initState() {
     super.initState();
@@ -93,16 +101,33 @@ class _HomeScreenState extends State<HomeScreen> {
             }[p.mood] ?? '❓';
 
             return Card(
-              child: ListTile(
-                leading: Text(emoji, style: const TextStyle(fontSize: 32)),
-                title: Text(p.mood),
-                subtitle: Text(p.date.length > 16 ? p.date.substring(0, 16) : p.date),
-                trailing: Text(
-  CurrencyService.format(p.amount),
-  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-),
-              ),
-            );
+  child: ListTile(
+    leading: Text(emoji, style: const TextStyle(fontSize: 32)),
+    title: Text(p.mood),
+    subtitle: Text(p.date.length > 16 ? p.date.substring(0, 16) : p.date),
+    trailing: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        Text(
+          CurrencyService.format(p.amount),
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 4),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: List.generate(5, (i) => Icon(
+            Icons.circle,
+            size: 8,
+            color: i < p.impulse
+                ? _impulseColor(p.impulse)
+                : Colors.grey[300],
+          )),
+        ),
+      ],
+    ),
+  ),
+);
           },
         ),
 ),

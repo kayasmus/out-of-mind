@@ -1,16 +1,20 @@
-
-
 class Purchase {
   final int? id;
   final String mood;
   final double? amount;
   final String location;
   final String date;
+  final int impulse;
 
+  Purchase({
+    this.id,
+    required this.mood,
+    required this.amount,
+    required this.location,
+    required this.date,
+    this.impulse = 3,
+  });
 
-  Purchase({this.id, required this.mood, required this.amount, required this.location, required this.date});
-
-  // Convert object to Map (for saving to DB)
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -18,10 +22,10 @@ class Purchase {
       'amount': amount,
       'location': location,
       'date': date,
+      'impulse': impulse,
     };
   }
 
-  // Create object from Map (for reading from DB)
   factory Purchase.fromMap(Map<String, dynamic> map) {
     return Purchase(
       id: map['id'],
@@ -29,6 +33,7 @@ class Purchase {
       amount: map['amount'],
       location: map['location'],
       date: map['date'],
+      impulse: map['impulse'] ?? 3,
     );
   }
 }
