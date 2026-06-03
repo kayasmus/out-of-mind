@@ -93,4 +93,15 @@ class DatabaseHelper {
       whereArgs: [id],
     );
   }
+
+  Future<void> confirmPlanned(PlannedPurchase planned) async {
+  final purchase = Purchase(
+    mood: planned.mood,
+    amount: planned.amount,
+    location: 'Planned purchase',
+    date: DateTime.now().toString(),
+  );
+  await insertPurchase(purchase);
+  await deletePlanned(planned.id!);
+}
 }

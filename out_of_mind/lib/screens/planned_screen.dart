@@ -140,25 +140,55 @@ class _PlannedScreenState extends State<PlannedScreen> {
                         ],
                         const SizedBox(height: 12),
                         Row(
-                          children: [
-                            Expanded(
-                              child: OutlinedButton(
-                                onPressed: () => _showMoodPicker(p),
-                                child: const Text('How do you feel now?'),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            IconButton(
-                              icon: const Icon(Icons.delete_outline,
-                                  color: Colors.red),
-                              onPressed: () async {
-                            await DatabaseHelper.instance.deletePlanned(p.id!);
-                            await NotificationService.cancelReminder(p.id!);
-                                  _load();
-                            },
-                            ),
-                          ],
-                        ),
+  children: [
+    Expanded(
+      child: OutlinedButton(
+        onPressed: () => _showMoodPicker(p),
+        child: const Text('How do you feel now?'),
+      ),
+    ),
+    const SizedBox(width: 8),
+    IconButton(
+      icon: const Icon(Icons.check_circle_outline,
+          color: Colors.green),
+      onPressed: () async {
+        final confirm = await showDialog<bool>(
+          context: context,
+          builder: (_) => AlertDialog(
+            title: const Text('Confirm Purchase'),
+            content: Text(
+                'Move "${p.name}" to your purchases?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Not yet'),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text('Yes, I bought it'),
+              ),
+            ],
+          ),
+        );
+        if (confirm == true) {
+          await DatabaseHelper.instance.confirmPlanned(p);
+          await NotificationService.cancelReminder(p.id!);
+          _load();
+        }
+      },
+    ),
+    IconButton(
+      icon: const Icon(Icons.delete_outline,
+          color: Colors.red),
+      onPressed: () async {
+        await DatabaseHelper.instance
+            .deletePlanned(p.id!);
+        await NotificationService.cancelReminder(p.id!);
+        _load();
+      },
+    ),
+  ],
+),
                       ],
                     ),
                   ),
