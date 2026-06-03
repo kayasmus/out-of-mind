@@ -57,4 +57,21 @@ static Future<void> initialize() async {
   static Future<void> cancelReminder(int id) async {
     await _plugin.cancel(id);
   }
+
+  static Future<void> sendWeeklyInsight(String mood, String emoji) async {
+  await _plugin.show(
+    999,
+    'Out of Mind — Weekly Insight',
+    'You tend to spend most when feeling $mood $emoji. Stay mindful this week.',
+    const NotificationDetails(
+      android: AndroidNotificationDetails(
+        'weekly_insight',
+        'Weekly Spending Insights',
+        channelDescription: 'Weekly mood and spending pattern notifications',
+        importance: Importance.defaultImportance,
+        priority: Priority.defaultPriority,
+      ),
+    ),
+  );
+}
 }
