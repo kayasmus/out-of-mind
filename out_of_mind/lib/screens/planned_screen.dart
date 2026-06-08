@@ -28,13 +28,16 @@ class _PlannedScreenState extends State<PlannedScreen> {
   }
 
   String _daysAgo(String createdAt) {
-    final created = DateTime.tryParse(createdAt);
-    if (created == null) return '';
-    final days = DateTime.now().difference(created).inDays;
-    if (days == 0) return 'Added today';
-    if (days == 1) return 'Added 1 day ago';
-    return 'Added $days days ago';
-  }
+  final created = DateTime.tryParse(createdAt);
+  if (created == null) return '';
+  final days = DateTime.now().difference(created).inDays;
+  if (days == 0) return 'Added today — fresh impulse!';
+  if (days == 1) return 'Added 1 day ago';
+  if (days <= 3) return 'Added $days days ago — still fresh';
+  if (days <= 7) return 'Added $days days ago — still thinking?';
+  if (days <= 14) return 'Added $days days ago — is this still relevant?';
+  return 'Added $days days ago — do you still want this?';
+}
 
   void _showMoodPicker(PlannedPurchase p) {
     showModalBottomSheet(
@@ -124,9 +127,21 @@ class _PlannedScreenState extends State<PlannedScreen> {
                           ],
                         ),
                         const SizedBox(height: 8),
-                        Text(_daysAgo(p.createdAt),
-                            style: TextStyle(
-                                color: Colors.grey[600], fontSize: 13)),
+                        Text(
+  _daysAgo(p.createdAt),
+  style: TextStyle(
+    fontSize: 13,
+    color: () {
+      final days = DateTime.now()
+          .difference(DateTime.tryParse(p.createdAt) ?? DateTime.now())
+          .inDays;
+      if (days == 0) return Colors.red[400];
+      if (days <= 3) return Colors.orange;
+      if (days <= 7) return Colors.amber;
+      return Colors.green;
+    }(),
+  ),
+),
                         if (p.notes != null && p.notes!.isNotEmpty) ...[
                           const SizedBox(height: 6),
                           Text(p.notes!),
