@@ -59,11 +59,11 @@ static Future<void> initialize() async {
     await _plugin.cancel(id);
   }
 
-  static Future<void> sendWeeklyInsight(String mood, String emoji) async {
+  static Future<void> sendWeeklyInsight(String mood, String message) async {
   await _plugin.show(
     999,
     'Out of Mind — Weekly Insight',
-    'You tend to spend most when feeling $mood $emoji. Stay mindful this week.',
+    message,
     const NotificationDetails(
       android: AndroidNotificationDetails(
         'weekly_insight',
