@@ -7,6 +7,7 @@ import 'planned_screen.dart';
 import '../services/currency_service.dart';
 import 'settings_screen.dart';
 import 'reflection_screen.dart';
+import 'trends_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -45,6 +46,15 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
   title: const Text("Home Screen"),
   actions: [
+    IconButton(
+  icon: const Icon(Icons.trending_up),
+  onPressed: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const TrendsScreen()),
+    );
+  },
+),
   IconButton(
     icon: const Icon(Icons.calendar_month),
     onPressed: () {
