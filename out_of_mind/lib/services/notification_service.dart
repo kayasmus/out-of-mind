@@ -1,6 +1,7 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz_data;
+import 'package:flutter/material.dart';
 
 
 class NotificationService {
@@ -73,5 +74,38 @@ static Future<void> initialize() async {
       ),
     ),
   );
+}
+
+static Future<void> scheduleWeeklyReflection(int weekday, TimeOfDay time) async {
+  final now = tz.TZDateTime.now(tz.UTC);
+  var scheduled = tz.TZDateTime(tz.UTC, now.year, now.month, now.day, time.hour, time.minute);
+
+  while (scheduled.weekday != weekday || scheduled.isBefore(now)) {
+    scheduled = scheduled.add(const Duration(days: 1));
+  }
+
+  await _plugin.zonedSchedule(
+    998,
+    'Out of Mind',
+    'Time to reflect on last week\'s spending 🧠',
+    scheduled,
+    const NotificationDetails(
+      android: AndroidNotificationDetails(
+        'weekly_reflection',
+        'Weekly Reflection Reminder',
+        channelDescription: 'Weekly reminder to check your spending reflection',
+        importance: Importance.defaultImportance,
+        priority: Priority.defaultPriority,
+      ),
+    ),
+    androidScheduleMode: AndroidScheduleMode.inexact,
+    uiLocalNotificationDateInterpretation:
+        UILocalNotificationDateInterpretation.absoluteTime,
+    matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
+  );
+}
+
+static Future<void> cancelWeeklyReflection() async {
+  await _plugin.cancel(998);
 }
 }
