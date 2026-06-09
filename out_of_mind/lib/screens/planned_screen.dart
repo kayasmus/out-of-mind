@@ -15,11 +15,14 @@ class PlannedScreen extends StatefulWidget {
 
 class _PlannedScreenState extends State<PlannedScreen> {
   List<PlannedPurchase> _planned = [];
+  double _spentThisWeek = 0;
+  double _spentThisMonth = 0;
 
   @override
   void initState() {
     super.initState();
     _load();
+    _loadSpendingContext();
   }
 
   Future<void> _load() async {
@@ -27,17 +30,43 @@ class _PlannedScreenState extends State<PlannedScreen> {
     setState(() => _planned = planned);
   }
 
+  Future<void> _loadSpendingContext() async {
+    final purchases = await DatabaseHelper.instance.getPurchases();
+    final now = DateTime.now();
+    final weekStart = now.subtract(Duration(days: now.weekday - 1));
+    final monthStart = DateTime(now.year, now.month, 1);
+
+    double week = 0;
+    double month = 0;
+
+    for (final p in purchases) {
+      final date = DateTime.tryParse(p.date);
+      if (date == null) continue;
+      if (date.isAfter(DateTime(weekStart.year, weekStart.month, weekStart.day))) {
+        week += p.amount ?? 0;
+      }
+      if (date.isAfter(monthStart)) {
+        month += p.amount ?? 0;
+      }
+    }
+
+    setState(() {
+      _spentThisWeek = week;
+      _spentThisMonth = month;
+    });
+  }
+
   String _daysAgo(String createdAt) {
-  final created = DateTime.tryParse(createdAt);
-  if (created == null) return '';
-  final days = DateTime.now().difference(created).inDays;
-  if (days == 0) return 'Added today — fresh impulse!';
-  if (days == 1) return 'Added 1 day ago';
-  if (days <= 3) return 'Added $days days ago — still fresh';
-  if (days <= 7) return 'Added $days days ago — still thinking?';
-  if (days <= 14) return 'Added $days days ago — is this still relevant?';
-  return 'Added $days days ago — do you still want this?';
-}
+    final created = DateTime.tryParse(createdAt);
+    if (created == null) return '';
+    final days = DateTime.now().difference(created).inDays;
+    if (days == 0) return 'Added today — fresh impulse!';
+    if (days == 1) return 'Added 1 day ago';
+    if (days <= 3) return 'Added $days days ago — still fresh';
+    if (days <= 7) return 'Added $days days ago — still thinking?';
+    if (days <= 14) return 'Added $days days ago — is this still relevant?';
+    return 'Added $days days ago — do you still want this?';
+  }
 
   void _showMoodPicker(PlannedPurchase p) {
     showModalBottomSheet(
@@ -119,8 +148,8 @@ class _PlannedScreenState extends State<PlannedScreen> {
                                           fontSize: 18,
                                           fontWeight: FontWeight.bold)),
                                   if (p.amount != null)
-  Text(CurrencyService.format(p.amount),
-      style: const TextStyle(fontSize: 15)),
+                                    Text(CurrencyService.format(p.amount),
+                                        style: const TextStyle(fontSize: 15)),
                                 ],
                               ),
                             ),
@@ -128,20 +157,20 @@ class _PlannedScreenState extends State<PlannedScreen> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-  _daysAgo(p.createdAt),
-  style: TextStyle(
-    fontSize: 13,
-    color: () {
-      final days = DateTime.now()
-          .difference(DateTime.tryParse(p.createdAt) ?? DateTime.now())
-          .inDays;
-      if (days == 0) return Colors.red[400];
-      if (days <= 3) return Colors.orange;
-      if (days <= 7) return Colors.amber;
-      return Colors.green;
-    }(),
-  ),
-),
+                          _daysAgo(p.createdAt),
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: () {
+                              final days = DateTime.now()
+                                  .difference(DateTime.tryParse(p.createdAt) ?? DateTime.now())
+                                  .inDays;
+                              if (days == 0) return Colors.red[400];
+                              if (days <= 3) return Colors.orange;
+                              if (days <= 7) return Colors.amber;
+                              return Colors.green;
+                            }(),
+                          ),
+                        ),
                         if (p.notes != null && p.notes!.isNotEmpty) ...[
                           const SizedBox(height: 6),
                           Text(p.notes!),
@@ -153,57 +182,123 @@ class _PlannedScreenState extends State<PlannedScreen> {
                             style: const TextStyle(fontSize: 13),
                           ),
                         ],
+                        const SizedBox(height: 8),
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: Colors.purple[50],
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              Column(
+                                children: [
+                                  const Text('This week',
+                                      style: TextStyle(
+                                          fontSize: 11, color: Colors.grey)),
+                                  Text(CurrencyService.format(_spentThisWeek),
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 13)),
+                                ],
+                              ),
+                              Container(
+                                  width: 1,
+                                  height: 30,
+                                  color: Colors.purple[100]),
+                              Column(
+                                children: [
+                                  const Text('This month',
+                                      style: TextStyle(
+                                          fontSize: 11, color: Colors.grey)),
+                                  Text(CurrencyService.format(_spentThisMonth),
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 13)),
+                                ],
+                              ),
+                              if (p.amount != null) ...[
+                                Container(
+                                    width: 1,
+                                    height: 30,
+                                    color: Colors.purple[100]),
+                                Column(
+                                  children: [
+                                    const Text('This want',
+                                        style: TextStyle(
+                                            fontSize: 11, color: Colors.grey)),
+                                    Text(
+                                      CurrencyService.format(p.amount),
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 13,
+                                          color: p.amount! > _spentThisWeek
+                                              ? Colors.red
+                                              : Colors.green),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
                         const SizedBox(height: 12),
                         Row(
-  children: [
-    Expanded(
-      child: OutlinedButton(
-        onPressed: () => _showMoodPicker(p),
-        child: const Text('How do you feel now?'),
-      ),
-    ),
-    const SizedBox(width: 8),
-    IconButton(
-      icon: const Icon(Icons.check_circle_outline,
-          color: Colors.green),
-      onPressed: () async {
-        final confirm = await showDialog<bool>(
-          context: context,
-          builder: (_) => AlertDialog(
-            title: const Text('Confirm Purchase'),
-            content: Text(
-                'Move "${p.name}" to your purchases?'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context, false),
-                child: const Text('Not yet'),
-              ),
-              ElevatedButton(
-                onPressed: () => Navigator.pop(context, true),
-                child: const Text('Yes, I bought it'),
-              ),
-            ],
-          ),
-        );
-        if (confirm == true) {
-          await DatabaseHelper.instance.confirmPlanned(p);
-          await NotificationService.cancelReminder(p.id!);
-          _load();
-        }
-      },
-    ),
-    IconButton(
-      icon: const Icon(Icons.delete_outline,
-          color: Colors.red),
-      onPressed: () async {
-        await DatabaseHelper.instance
-            .deletePlanned(p.id!);
-        await NotificationService.cancelReminder(p.id!);
-        _load();
-      },
-    ),
-  ],
-),
+                          children: [
+                            Expanded(
+                              child: OutlinedButton(
+                                onPressed: () => _showMoodPicker(p),
+                                child: const Text('How do you feel now?'),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            IconButton(
+                              icon: const Icon(Icons.check_circle_outline,
+                                  color: Colors.green),
+                              onPressed: () async {
+                                final confirm = await showDialog<bool>(
+                                  context: context,
+                                  builder: (_) => AlertDialog(
+                                    title: const Text('Confirm Purchase'),
+                                    content: Text(
+                                        'Move "${p.name}" to your purchases?'),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () =>
+                                            Navigator.pop(context, false),
+                                        child: const Text('Not yet'),
+                                      ),
+                                      ElevatedButton(
+                                        onPressed: () =>
+                                            Navigator.pop(context, true),
+                                        child: const Text('Yes, I bought it'),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                                if (confirm == true) {
+                                  await DatabaseHelper.instance
+                                      .confirmPlanned(p);
+                                  await NotificationService.cancelReminder(
+                                      p.id!);
+                                  _load();
+                                }
+                              },
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.delete_outline,
+                                  color: Colors.red),
+                              onPressed: () async {
+                                await DatabaseHelper.instance
+                                    .deletePlanned(p.id!);
+                                await NotificationService.cancelReminder(
+                                    p.id!);
+                                _load();
+                              },
+                            ),
+                          ],
+                        ),
                       ],
                     ),
                   ),
