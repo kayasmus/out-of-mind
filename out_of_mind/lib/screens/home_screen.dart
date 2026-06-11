@@ -8,6 +8,7 @@ import '../services/currency_service.dart';
 import 'settings_screen.dart';
 import 'reflection_screen.dart';
 import 'trends_screen.dart';
+import 'edit_purchase_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -39,6 +40,11 @@ class _HomeScreenState extends State<HomeScreen> {
       _purchases = purchases;
     });
   }
+
+  Future<void> _deletePurchase(int id) async {
+  await DatabaseHelper.instance.deletePurchase(id);
+  _loadPurchases();
+}
 
   @override
   Widget build(BuildContext context) {
@@ -120,34 +126,55 @@ class _HomeScreenState extends State<HomeScreen> {
               'Lonely': '😔', 'Bored': '😑', 'Anxious': '😰',
             }[p.mood] ?? '❓';
 
-            return Card(
-  child: ListTile(
-    leading: Text(emoji, style: const TextStyle(fontSize: 32)),
-    title: Text(p.mood),
-    subtitle: Text(p.date.length > 16 ? p.date.substring(0, 16) : p.date),
-    trailing: Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        Text(
-          CurrencyService.format(p.amount),
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 4),
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: List.generate(5, (i) => Icon(
-            Icons.circle,
-            size: 8,
-            color: i < p.impulse
-                ? _impulseColor(p.impulse)
-                : Colors.grey[300],
-          )),
-        ),
-      ],
-    ),
+            return Dismissible(
+  key: Key(p.id.toString()),
+  direction: DismissDirection.endToStart,
+  background: Container(
+    alignment: Alignment.centerRight,
+    padding: const EdgeInsets.only(right: 20),
+    color: Colors.red,
+    child: const Icon(Icons.delete, color: Colors.white),
   ),
-);
+  onDismissed: (_) => _deletePurchase(p.id!),
+  child: Card(
+    child: GestureDetector(
+      onTap: () {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => EditPurchaseScreen(purchase: p),
+        ),
+      ).then((_) => _loadPurchases());
+    },
+      child: ListTile(
+                    leading: Text(emoji, style: const TextStyle(fontSize: 32)),
+                    title: Text(p.mood),
+                    subtitle: Text(p.date.length > 16 ? p.date.substring(0, 16) : p.date),
+                    trailing: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          CurrencyService.format(p.amount),
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 4),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: List.generate(5, (i) => Icon(
+                Icons.circle,
+                size: 8,
+                color: i < p.impulse
+                    ? _impulseColor(p.impulse)
+                    : Colors.grey[300],
+                          )),
+                        ),
+                      ],
+                    ),
+                  ),
+    ),
+              ),
+            );
           },
         ),
 ),

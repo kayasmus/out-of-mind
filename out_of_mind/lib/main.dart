@@ -18,17 +18,36 @@ Future<void> _sendWeeklyInsightIfNeeded() async {
   final purchases = await DatabaseHelper.instance.getPurchases();
   if (purchases.isEmpty) return;
 
+  // Find mood with highest average impulse
+  final Map<String, List<int>> moodImpulses = {};
+  for (final p in purchases) {
+    moodImpulses.putIfAbsent(p.mood, () => []).add(p.impulse);
+  }
+
+  final moodAvgImpulse = moodImpulses.map((mood, impulses) =>
+      MapEntry(mood, impulses.reduce((a, b) => a + b) / impulses.length));
+
+  final topImpulseMood = moodAvgImpulse.entries
+      .reduce((a, b) => a.value > b.value ? a : b)
+      .key;
+
+  // Find mood with highest total spend
   final Map<String, double> moodTotals = {};
   for (final p in purchases) {
     moodTotals[p.mood] = (moodTotals[p.mood] ?? 0) + (p.amount ?? 0);
   }
-
-  final topMood = moodTotals.entries
+  final topSpendMood = moodTotals.entries
       .reduce((a, b) => a.value > b.value ? a : b)
       .key;
 
-  final emoji = moodEmojis[topMood] ?? '❓';
-  await NotificationService.sendWeeklyInsight(topMood, emoji);
+  final emoji = moodEmojis[topImpulseMood] ?? '❓';
+  final spendEmoji = moodEmojis[topSpendMood] ?? '❓';
+
+  final message = topImpulseMood == topSpendMood
+      ? 'You spend the most AND feel most impulsive when $topImpulseMood $emoji. Stay mindful!'
+      : 'You feel most impulsive when $topImpulseMood $emoji, and spend most when $topSpendMood $spendEmoji.';
+
+  await NotificationService.sendWeeklyInsight(topImpulseMood, message);
   await prefs.setString('last_insight_date', today);
 }
 

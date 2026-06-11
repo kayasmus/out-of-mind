@@ -48,6 +48,21 @@ class DatabaseHelper {
   }
 }
 
+Future<int> updatePurchase(Purchase purchase) async {
+  Database db = await instance.database;
+  return await db.update(
+    'Purchases',
+    purchase.toMap(),
+    where: 'id = ?',
+    whereArgs: [purchase.id],
+  );
+}
+
+Future<int> deletePurchase(int id) async {
+  Database db = await instance.database;
+  return await db.delete('Purchases', where: 'id = ?', whereArgs: [id]);
+}
+
   //Insert purchases
   Future<int> insertPurchase(Purchase purchase) async {
     Database db = await instance.database;
