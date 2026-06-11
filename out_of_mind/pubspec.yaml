@@ -37,6 +37,7 @@ dependencies:
   path: ^1.9.0
   path_provider: ^2.1.5
   timezone: ^0.9.4
+  flutter_timezone: ^5.0.2
   shared_preferences: ^2.3.0
   geocoding: ^3.0.0
   fl_chart: ^0.69.0

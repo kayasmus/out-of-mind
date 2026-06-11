@@ -1,4 +1,3 @@
-import 'package:out_of_mind/models/location.dart';
 import 'package:out_of_mind/models/planned_purchase.dart';
 import 'package:out_of_mind/models/purchase.dart';
 import 'package:path/path.dart';
@@ -31,11 +30,9 @@ class DatabaseHelper {
   // Create table structure
   Future _onCreate(Database db, int version) async {
     await db.execute(
-    "CREATE TABLE Purchases (id INTEGER PRIMARY KEY, mood TEXT, amount REAL, location TEXT, date DATETIME )");
-      await db.execute(
-     "CREATE TABLE Planned (id INTEGER PRIMARY KEY, name TEXT, amount REAL, reminder_date DATETIME, mood TEXT)");
-      await db.execute(
-      "CREATE TABLE Locations (id INTEGER PRIMARY KEY, name TEXT, link TEXT)");
+        "CREATE TABLE Purchases (id INTEGER PRIMARY KEY, mood TEXT, amount REAL, location TEXT, date DATETIME, impulse INTEGER DEFAULT 3)");
+    await db.execute(
+        "CREATE TABLE Planned (id INTEGER PRIMARY KEY, name TEXT, amount REAL, reminder_date DATETIME, mood TEXT, notes TEXT, created_at TEXT)");
   }
 
   Future _onUpgrade(Database db, int oldVersion, int newVersion) async {
@@ -74,14 +71,10 @@ Future<int> deletePurchase(int id) async {
     return await db.insert('Planned', planned.toMap());
   }
 
-  Future<int> insertLocations(Location locations) async {
-    Database db = await instance.database;
-    return await db.insert('Locations', locations.toMap());
-  }
-
   Future<List<Purchase>> getPurchases() async{
       Database db = await instance.database;
-      final List<Map<String, dynamic>> maps = await db.query('Purchases');
+      final List<Map<String, dynamic>> maps =
+          await db.query('Purchases', orderBy: 'date DESC');
       return List.generate(maps.length, (i) => Purchase.fromMap(maps[i]));
   }
 
@@ -89,12 +82,6 @@ Future<int> deletePurchase(int id) async {
       Database db = await instance.database;
       final List<Map<String, dynamic>> maps = await db.query('Planned');
       return List.generate(maps.length, (i) => PlannedPurchase.fromMap(maps[i]));
-  }
-
-  Future<List<Location>> getLocation() async{
-      Database db = await instance.database;
-      final List<Map<String, dynamic>> maps = await db.query('Locations');
-      return List.generate(maps.length, (i) => Location.fromMap(maps[i]));
   }
 
   Future<int> deletePlanned(int id) async {
@@ -115,7 +102,7 @@ Future<int> deletePurchase(int id) async {
   Future<void> confirmPlanned(PlannedPurchase planned) async {
   final purchase = Purchase(
     mood: planned.mood,
-    amount: planned.amount,
+    amount: planned.amount ?? 0,
     location: 'Planned purchase',
     date: DateTime.now().toString(),
   );

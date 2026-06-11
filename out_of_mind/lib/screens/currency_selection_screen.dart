@@ -3,25 +3,25 @@ import '../services/currency_service.dart';
 import 'home_screen.dart';
 
 const List<Map<String, String>> currencies = [
-  {'name': 'US Dollar', 'symbol': '\$', 'flag': '🇺🇸'},
-  {'name': 'Euro', 'symbol': '€', 'flag': '🇪🇺'},
-  {'name': 'British Pound', 'symbol': '£', 'flag': '🇬🇧'},
-  {'name': 'Japanese Yen', 'symbol': '¥', 'flag': '🇯🇵'},
-  {'name': 'Chinese Yuan', 'symbol': '¥', 'flag': '🇨🇳'},
-  {'name': 'South Korean Won', 'symbol': '₩', 'flag': '🇰🇷'},
-  {'name': 'Indian Rupee', 'symbol': '₹', 'flag': '🇮🇳'},
-  {'name': 'Swiss Franc', 'symbol': 'CHF', 'flag': '🇨🇭'},
-  {'name': 'Australian Dollar', 'symbol': 'A\$', 'flag': '🇦🇺'},
-  {'name': 'Canadian Dollar', 'symbol': 'C\$', 'flag': '🇨🇦'},
-  {'name': 'Brazilian Real', 'symbol': 'R\$', 'flag': '🇧🇷'},
-  {'name': 'Mexican Peso', 'symbol': 'MX\$', 'flag': '🇲🇽'},
-  {'name': 'Swedish Krona', 'symbol': 'kr', 'flag': '🇸🇪'},
-  {'name': 'Norwegian Krone', 'symbol': 'kr', 'flag': '🇳🇴'},
-  {'name': 'Danish Krone', 'symbol': 'kr', 'flag': '🇩🇰'},
-  {'name': 'Singapore Dollar', 'symbol': 'S\$', 'flag': '🇸🇬'},
-  {'name': 'Hong Kong Dollar', 'symbol': 'HK\$', 'flag': '🇭🇰'},
-  {'name': 'Turkish Lira', 'symbol': '₺', 'flag': '🇹🇷'},
-  {'name': 'Polish Zloty', 'symbol': 'zł', 'flag': '🇵🇱'},
+  {'code': 'USD', 'name': 'US Dollar', 'symbol': '\$', 'flag': '🇺🇸'},
+  {'code': 'EUR', 'name': 'Euro', 'symbol': '€', 'flag': '🇪🇺'},
+  {'code': 'GBP', 'name': 'British Pound', 'symbol': '£', 'flag': '🇬🇧'},
+  {'code': 'JPY', 'name': 'Japanese Yen', 'symbol': '¥', 'flag': '🇯🇵'},
+  {'code': 'CNY', 'name': 'Chinese Yuan', 'symbol': '¥', 'flag': '🇨🇳'},
+  {'code': 'KRW', 'name': 'South Korean Won', 'symbol': '₩', 'flag': '🇰🇷'},
+  {'code': 'INR', 'name': 'Indian Rupee', 'symbol': '₹', 'flag': '🇮🇳'},
+  {'code': 'CHF', 'name': 'Swiss Franc', 'symbol': 'CHF', 'flag': '🇨🇭'},
+  {'code': 'AUD', 'name': 'Australian Dollar', 'symbol': 'A\$', 'flag': '🇦🇺'},
+  {'code': 'CAD', 'name': 'Canadian Dollar', 'symbol': 'C\$', 'flag': '🇨🇦'},
+  {'code': 'BRL', 'name': 'Brazilian Real', 'symbol': 'R\$', 'flag': '🇧🇷'},
+  {'code': 'MXN', 'name': 'Mexican Peso', 'symbol': 'MX\$', 'flag': '🇲🇽'},
+  {'code': 'SEK', 'name': 'Swedish Krona', 'symbol': 'kr', 'flag': '🇸🇪'},
+  {'code': 'NOK', 'name': 'Norwegian Krone', 'symbol': 'kr', 'flag': '🇳🇴'},
+  {'code': 'DKK', 'name': 'Danish Krone', 'symbol': 'kr', 'flag': '🇩🇰'},
+  {'code': 'SGD', 'name': 'Singapore Dollar', 'symbol': 'S\$', 'flag': '🇸🇬'},
+  {'code': 'HKD', 'name': 'Hong Kong Dollar', 'symbol': 'HK\$', 'flag': '🇭🇰'},
+  {'code': 'TRY', 'name': 'Turkish Lira', 'symbol': '₺', 'flag': '🇹🇷'},
+  {'code': 'PLN', 'name': 'Polish Zloty', 'symbol': 'zł', 'flag': '🇵🇱'},
 ];
 
 class CurrencySelectionScreen extends StatefulWidget {
@@ -35,7 +35,7 @@ class CurrencySelectionScreen extends StatefulWidget {
 class _CurrencySelectionScreenState extends State<CurrencySelectionScreen> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
-  String? _selectedSymbol;
+  String? _selectedCode;
 
   final List<Map<String, dynamic>> _onboardingPages = [
     {
@@ -159,8 +159,7 @@ class _CurrencySelectionScreenState extends State<CurrencySelectionScreen> {
                           itemCount: currencies.length,
                           itemBuilder: (context, index) {
                             final c = currencies[index];
-                            final isSelected =
-                                c['symbol'] == _selectedSymbol;
+                            final isSelected = c['code'] == _selectedCode;
                             return ListTile(
                               leading: Text(c['flag']!,
                                   style: const TextStyle(fontSize: 28)),
@@ -173,8 +172,7 @@ class _CurrencySelectionScreenState extends State<CurrencySelectionScreen> {
                                           fontSize: 18,
                                           fontWeight: FontWeight.bold)),
                               onTap: () {
-                                setState(
-                                    () => _selectedSymbol = c['symbol']);
+                                setState(() => _selectedCode = c['code']);
                               },
                             );
                           },
@@ -185,11 +183,13 @@ class _CurrencySelectionScreenState extends State<CurrencySelectionScreen> {
                         child: SizedBox(
                           width: double.infinity,
                           child: ElevatedButton(
-                            onPressed: _selectedSymbol == null
+                            onPressed: _selectedCode == null
                                 ? null
                                 : () async {
-                                    await CurrencyService
-                                        .save(_selectedSymbol!);
+                                    final c = currencies.firstWhere(
+                                        (c) => c['code'] == _selectedCode);
+                                    await CurrencyService.save(
+                                        c['code']!, c['symbol']!);
                                     if (context.mounted) {
                                       Navigator.pushReplacement(
                                         context,

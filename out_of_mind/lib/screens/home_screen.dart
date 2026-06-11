@@ -9,6 +9,8 @@ import 'settings_screen.dart';
 import 'reflection_screen.dart';
 import 'trends_screen.dart';
 import 'edit_purchase_screen.dart';
+import '../constants/mood_emojis.dart';
+import '../constants/impulse_color.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -19,14 +21,6 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   List<Purchase> _purchases = [];
-
-  Color _impulseColor(int value) {
-  if (value <= 1) return Colors.green;
-  if (value <= 2) return Colors.lightGreen;
-  if (value <= 3) return Colors.orange;
-  if (value <= 4) return Colors.deepOrange;
-  return Colors.red;
-}
 
   @override
   void initState() {
@@ -120,11 +114,7 @@ class _HomeScreenState extends State<HomeScreen> {
           itemCount: _purchases.length,
           itemBuilder: (context, index) {
             final p = _purchases[index];
-            final emoji = {
-              'Happy': '😊', 'Sad': '😢', 'Euphoric': '🤩',
-              'Sleepy': '😴', 'Drunk': '🥴', 'Angry': '😠',
-              'Lonely': '😔', 'Bored': '😑', 'Anxious': '😰',
-            }[p.mood] ?? '❓';
+            final emoji = moodEmojis[p.mood] ?? '❓';
 
             return Dismissible(
   key: Key(p.id.toString()),
@@ -165,7 +155,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 Icons.circle,
                 size: 8,
                 color: i < p.impulse
-                    ? _impulseColor(p.impulse)
+                    ? impulseColor(p.impulse)
                     : Colors.grey[300],
                           )),
                         ),

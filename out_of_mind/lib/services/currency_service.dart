@@ -2,25 +2,32 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
 
 class CurrencyService {
-  static const _key = 'currency_symbol';
+  static const _symbolKey = 'currency_symbol';
+  static const _codeKey = 'currency_code';
+
   static String _symbol = '\$';
+  static String _code = 'USD';
 
   static String get symbol => _symbol;
+  static String get code => _code;
 
   static Future<void> load() async {
     final prefs = await SharedPreferences.getInstance();
-    _symbol = prefs.getString(_key) ?? '\$';
+    _symbol = prefs.getString(_symbolKey) ?? '\$';
+    _code = prefs.getString(_codeKey) ?? 'USD';
   }
 
-  static Future<void> save(String symbol) async {
+  static Future<void> save(String code, String symbol) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_key, symbol);
+    await prefs.setString(_codeKey, code);
+    await prefs.setString(_symbolKey, symbol);
+    _code = code;
     _symbol = symbol;
   }
 
   static Future<bool> isSet() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.containsKey(_key);
+    return prefs.containsKey(_symbolKey);
   }
 
   static String format(double? amount) {

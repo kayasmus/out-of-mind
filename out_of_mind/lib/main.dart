@@ -10,10 +10,12 @@ import 'constants/mood_emojis.dart';
 
 Future<void> _sendWeeklyInsightIfNeeded() async {
   final prefs = await SharedPreferences.getInstance();
-  final lastSent = prefs.getString('last_insight_date') ?? '';
-  final today = DateTime.now().toString().substring(0, 10);
+  final lastSentStr = prefs.getString('last_insight_date');
+  final lastSent = lastSentStr != null ? DateTime.tryParse(lastSentStr) : null;
+  final now = DateTime.now();
 
-  if (lastSent == today) return;
+  // Only send once per week.
+  if (lastSent != null && now.difference(lastSent).inDays < 7) return;
 
   final purchases = await DatabaseHelper.instance.getPurchases();
   if (purchases.isEmpty) return;
@@ -34,7 +36,7 @@ Future<void> _sendWeeklyInsightIfNeeded() async {
   // Find mood with highest total spend
   final Map<String, double> moodTotals = {};
   for (final p in purchases) {
-    moodTotals[p.mood] = (moodTotals[p.mood] ?? 0) + (p.amount ?? 0);
+    moodTotals[p.mood] = (moodTotals[p.mood] ?? 0) + p.amount;
   }
   final topSpendMood = moodTotals.entries
       .reduce((a, b) => a.value > b.value ? a : b)
@@ -48,7 +50,7 @@ Future<void> _sendWeeklyInsightIfNeeded() async {
       : 'You feel most impulsive when $topImpulseMood $emoji, and spend most when $topSpendMood $spendEmoji.';
 
   await NotificationService.sendWeeklyInsight(topImpulseMood, message);
-  await prefs.setString('last_insight_date', today);
+  await prefs.setString('last_insight_date', DateTime.now().toIso8601String());
 }
 
 void main() async {
@@ -56,14 +58,17 @@ void main() async {
   try {
     await NotificationService.initialize();
   } catch (e) {
-    print('Notification init failed: $e');
+    debugPrint('Notification init failed: $e');
   }
   await CurrencyService.load();
-  await _sendWeeklyInsightIfNeeded();
 
   final currencySet = await CurrencyService.isSet();
 
   runApp(MyApp(showCurrencySelection: !currencySet));
+
+  // Fire-and-forget: don't block startup on the insight computation.
+  _sendWeeklyInsightIfNeeded().catchError(
+      (Object e) => debugPrint('Weekly insight failed: $e'));
 }
 
 class MyApp extends StatelessWidget {

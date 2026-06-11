@@ -1,7 +1,7 @@
 class Purchase {
   final int? id;
   final String mood;
-  final double? amount;
+  final double amount;
   final String location;
   final String date;
   final int impulse;
@@ -30,7 +30,8 @@ class Purchase {
     return Purchase(
       id: map['id'],
       mood: map['mood'],
-      amount: map['amount'],
+      // Older rows may have a NULL amount in the DB.
+      amount: (map['amount'] as num?)?.toDouble() ?? 0,
       location: map['location'],
       date: map['date'],
       impulse: map['impulse'] ?? 3,

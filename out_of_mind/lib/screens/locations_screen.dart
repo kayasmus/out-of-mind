@@ -43,7 +43,7 @@ class _LocationsScreenState extends State<LocationsScreen> {
                 final location = entry.key;
                 final purchases = entry.value;
                 final total = purchases.fold<double>(
-                    0, (sum, p) => sum + (p.amount ?? 0));
+                    0, (sum, p) => sum + p.amount);
 
                 return Card(
                   child: ExpansionTile(

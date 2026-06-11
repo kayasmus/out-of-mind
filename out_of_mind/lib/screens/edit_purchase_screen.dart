@@ -3,6 +3,7 @@ import '../db/database_helper.dart';
 import '../models/purchase.dart';
 import '../services/currency_service.dart';
 import '../constants/mood_emojis.dart';
+import '../constants/impulse_color.dart';
 
 class EditPurchaseScreen extends StatefulWidget {
   final Purchase purchase;
@@ -22,16 +23,8 @@ class _EditPurchaseScreenState extends State<EditPurchaseScreen> {
     super.initState();
     selectedMood = widget.purchase.mood;
     amountController = TextEditingController(
-        text: widget.purchase.amount?.toString() ?? '');
+        text: widget.purchase.amount.toString());
     _impulse = widget.purchase.impulse.toDouble();
-  }
-
-  Color _impulseColor(double value) {
-    if (value <= 1) return Colors.green;
-    if (value <= 2) return Colors.lightGreen;
-    if (value <= 3) return Colors.orange;
-    if (value <= 4) return Colors.deepOrange;
-    return Colors.red;
   }
 
   Future<void> _save() async {
@@ -80,13 +73,13 @@ class _EditPurchaseScreenState extends State<EditPurchaseScreen> {
             ),
             const SizedBox(height: 16),
             Text('Impulse level: ${_impulse.round()}',
-                style: TextStyle(color: _impulseColor(_impulse))),
+                style: TextStyle(color: impulseColor(_impulse))),
             Slider(
               value: _impulse,
               min: 1,
               max: 5,
               divisions: 4,
-              activeColor: _impulseColor(_impulse),
+              activeColor: impulseColor(_impulse),
               onChanged: (value) => setState(() => _impulse = value),
             ),
             const SizedBox(height: 16),

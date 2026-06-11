@@ -46,7 +46,7 @@ class _TrendsScreenState extends State<TrendsScreen> {
       }).toList();
 
       final total = weekPurchases.fold<double>(
-          0, (sum, p) => sum + (p.amount ?? 0));
+          0, (sum, p) => sum + p.amount);
 
       // Find peak mood (most frequent)
       String? topMood;
@@ -73,7 +73,7 @@ class _TrendsScreenState extends State<TrendsScreen> {
   Map<String, double> _moodTotals() {
     final Map<String, double> totals = {};
     for (final p in _purchases) {
-      totals[p.mood] = (totals[p.mood] ?? 0) + (p.amount ?? 0);
+      totals[p.mood] = (totals[p.mood] ?? 0) + p.amount;
     }
     return totals;
   }

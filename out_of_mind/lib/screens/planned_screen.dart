@@ -43,10 +43,10 @@ class _PlannedScreenState extends State<PlannedScreen> {
       final date = DateTime.tryParse(p.date);
       if (date == null) continue;
       if (date.isAfter(DateTime(weekStart.year, weekStart.month, weekStart.day))) {
-        week += p.amount ?? 0;
+        week += p.amount;
       }
       if (date.isAfter(monthStart)) {
-        month += p.amount ?? 0;
+        month += p.amount;
       }
     }
 
@@ -87,6 +87,7 @@ class _PlannedScreenState extends State<PlannedScreen> {
                   onTap: () async {
                     await DatabaseHelper.instance
                         .updatePlannedMood(p.id!, entry.key);
+                    if (!context.mounted) return;
                     Navigator.pop(context);
                     _load();
                   },
@@ -186,7 +187,9 @@ class _PlannedScreenState extends State<PlannedScreen> {
                         Container(
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            color: Colors.purple[50],
+                            color: Theme.of(context)
+                                .colorScheme
+                                .primaryContainer,
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Row(
@@ -206,7 +209,9 @@ class _PlannedScreenState extends State<PlannedScreen> {
                               Container(
                                   width: 1,
                                   height: 30,
-                                  color: Colors.purple[100]),
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .outlineVariant),
                               Column(
                                 children: [
                                   const Text('This month',
@@ -222,7 +227,9 @@ class _PlannedScreenState extends State<PlannedScreen> {
                                 Container(
                                     width: 1,
                                     height: 30,
-                                    color: Colors.purple[100]),
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .outlineVariant),
                                 Column(
                                   children: [
                                     const Text('This want',

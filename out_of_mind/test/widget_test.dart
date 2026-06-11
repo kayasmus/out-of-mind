@@ -1,30 +1,29 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:out_of_mind/main.dart';
+import 'package:out_of_mind/screens/currency_selection_screen.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  testWidgets('shows onboarding when no currency is set',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(const MyApp(showCurrencySelection: true));
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    expect(find.text('Welcome to Out of Mind'), findsOneWidget);
+    expect(find.text('Next'), findsOneWidget);
+  });
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+  testWidgets('onboarding advances to next page', (WidgetTester tester) async {
+    await tester.pumpWidget(const MyApp(showCurrencySelection: true));
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    await tester.tap(find.text('Next'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Track how you feel when you spend'), findsOneWidget);
+  });
+
+  test('every currency has a unique code', () {
+    final codes = currencies.map((c) => c['code']).toSet();
+    expect(codes.length, currencies.length);
+    expect(codes.contains(null), isFalse);
   });
 }

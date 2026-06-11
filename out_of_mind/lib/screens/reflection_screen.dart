@@ -74,7 +74,7 @@ class _ReflectionScreenState extends State<ReflectionScreen> {
       final date = DateTime.tryParse(p.date);
       if (date != null) {
         final day = names[date.weekday - 1];
-        days[day] = (days[day] ?? 0) + (p.amount ?? 0);
+        days[day] = (days[day] ?? 0) + p.amount;
       }
     }
     return days;
@@ -87,7 +87,7 @@ class _ReflectionScreenState extends State<ReflectionScreen> {
       if (date != null) {
         final weekNum = ((date.day - 1) / 7).floor() + 1;
         final key = 'Week $weekNum';
-        weeks[key] = (weeks[key] ?? 0) + (p.amount ?? 0);
+        weeks[key] = (weeks[key] ?? 0) + p.amount;
       }
     }
     return weeks;
@@ -104,15 +104,14 @@ class _ReflectionScreenState extends State<ReflectionScreen> {
         (result[p.mood]!['days'] as Set).add(p.date.substring(0, 10));
       }
       result[p.mood]!['total'] =
-          (result[p.mood]!['total'] as double) + (p.amount ?? 0);
+          (result[p.mood]!['total'] as double) + p.amount;
     }
     return result;
   }
 
   Purchase? _highestPurchase(List<Purchase> purchases) {
     if (purchases.isEmpty) return null;
-    return purchases.reduce(
-        (a, b) => (a.amount ?? 0) > (b.amount ?? 0) ? a : b);
+    return purchases.reduce((a, b) => a.amount > b.amount ? a : b);
   }
 
   String _topMood(Map<String, Map<String, dynamic>> moods) {
@@ -140,7 +139,7 @@ class _ReflectionScreenState extends State<ReflectionScreen> {
   @override
   Widget build(BuildContext context) {
     final purchases = _filtered;
-    final total = purchases.fold<double>(0, (s, p) => s + (p.amount ?? 0));
+    final total = purchases.fold<double>(0, (s, p) => s + p.amount);
     final moods = _byMood(purchases);
     final highest = _highestPurchase(purchases);
     final topMood = _topMood(moods);
@@ -210,7 +209,7 @@ class _ReflectionScreenState extends State<ReflectionScreen> {
                             children: [
                               // Header card
                               Card(
-                                color: Colors.purple[50],
+                                color: Theme.of(context).colorScheme.primaryContainer,
                                 child: Padding(
                                   padding: const EdgeInsets.all(16),
                                   child: Column(
@@ -251,7 +250,9 @@ class _ReflectionScreenState extends State<ReflectionScreen> {
                                         Text(e.key,
                                             style: TextStyle(
                                                 color: e.value > 0
-                                                    ? Colors.black
+                                                    ? Theme.of(context)
+                                                        .colorScheme
+                                                        .onSurface
                                                     : Colors.grey[400])),
                                         Text(
                                           e.value > 0
@@ -262,7 +263,9 @@ class _ReflectionScreenState extends State<ReflectionScreen> {
                                                   ? FontWeight.bold
                                                   : FontWeight.normal,
                                               color: e.value > 0
-                                                  ? Colors.black
+                                                  ? Theme.of(context)
+                                                      .colorScheme
+                                                      .onSurface
                                                   : Colors.grey[400]),
                                         ),
                                       ],
@@ -303,7 +306,9 @@ class _ReflectionScreenState extends State<ReflectionScreen> {
                                         fontWeight: FontWeight.bold)),
                                 const SizedBox(height: 8),
                                 Card(
-                                  color: Colors.orange[50],
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .secondaryContainer,
                                   child: ListTile(
                                     leading: Text(
                                         moodEmojis[highest.mood] ?? '❓',
@@ -324,7 +329,7 @@ class _ReflectionScreenState extends State<ReflectionScreen> {
                               // Reflective messages
                               if (topMood.isNotEmpty)
                                 Card(
-                                  color: Colors.purple[50],
+                                  color: Theme.of(context).colorScheme.primaryContainer,
                                   child: Padding(
                                     padding: const EdgeInsets.all(16),
                                     child: Text(
@@ -336,7 +341,9 @@ class _ReflectionScreenState extends State<ReflectionScreen> {
                               const SizedBox(height: 8),
                               if (lightest != null)
                                 Card(
-                                  color: Colors.green[50],
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .tertiaryContainer,
                                   child: Padding(
                                     padding: const EdgeInsets.all(16),
                                     child: Text(

@@ -13,6 +13,7 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   String _currentSymbol = CurrencyService.symbol;
+  String _currentCode = CurrencyService.code;
   int _reminderWeekday = 1;
   TimeOfDay _reminderTime = const TimeOfDay(hour: 9, minute: 0);
   bool _reminderSet = false;
@@ -69,7 +70,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   ListTile(
     contentPadding: EdgeInsets.zero,
     title: const Text('Currency'),
-    subtitle: Text('Current: $_currentSymbol'),
+    subtitle: Text('Current: $_currentCode ($_currentSymbol)'),
     trailing: const Icon(Icons.chevron_right),
     onTap: () {
       showModalBottomSheet(
@@ -90,7 +91,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   itemCount: currencies.length,
                   itemBuilder: (context, index) {
                     final c = currencies[index];
-                    final isSelected = c['symbol'] == _currentSymbol;
+                    final isSelected = c['code'] == _currentCode;
                     return ListTile(
                       leading: Text(c['flag']!,
                           style: const TextStyle(fontSize: 28)),
@@ -103,8 +104,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold)),
                       onTap: () async {
-                        await CurrencyService.save(c['symbol']!);
-                        setState(() => _currentSymbol = c['symbol']!);
+                        await CurrencyService.save(c['code']!, c['symbol']!);
+                        if (!context.mounted) return;
+                        setState(() {
+                          _currentCode = c['code']!;
+                          _currentSymbol = c['symbol']!;
+                        });
                         Navigator.pop(context);
                       },
                     );
