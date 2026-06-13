@@ -1,12 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:out_of_mind/screens/currency_selection_screen.dart';
 import 'screens/home_screen.dart';
+import 'screens/planned_screen.dart';
+import 'screens/reflection_screen.dart';
+import 'screens/trends_screen.dart';
 import 'services/notification_service.dart';
 import 'services/currency_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'db/database_helper.dart';
 import 'models/purchase.dart';
 import 'constants/mood_emojis.dart';
+
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
+void _openFromNotification(String? payload) {
+  final nav = navigatorKey.currentState;
+  if (nav == null || payload == null) return;
+  switch (payload) {
+    case NotificationService.payloadPlanned:
+      nav.push(MaterialPageRoute(builder: (_) => const PlannedScreen()));
+    case NotificationService.payloadReflection:
+      nav.push(MaterialPageRoute(builder: (_) => const ReflectionScreen()));
+    case NotificationService.payloadInsight:
+      nav.push(MaterialPageRoute(builder: (_) => const TrendsScreen()));
+  }
+}
 
 Future<void> _sendWeeklyInsightIfNeeded() async {
   final prefs = await SharedPreferences.getInstance();
@@ -56,7 +74,7 @@ Future<void> _sendWeeklyInsightIfNeeded() async {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   try {
-    await NotificationService.initialize();
+    await NotificationService.initialize(onTap: _openFromNotification);
   } catch (e) {
     debugPrint('Notification init failed: $e');
   }
@@ -65,6 +83,14 @@ void main() async {
   final currencySet = await CurrencyService.isSet();
 
   runApp(MyApp(showCurrencySelection: !currencySet));
+
+  // If the app was cold-started by tapping a notification, route there once
+  // the first frame is up.
+  final launchPayload = await NotificationService.getLaunchPayload();
+  if (launchPayload != null) {
+    WidgetsBinding.instance.addPostFrameCallback(
+        (_) => _openFromNotification(launchPayload));
+  }
 
   // Fire-and-forget: don't block startup on the insight computation.
   _sendWeeklyInsightIfNeeded().catchError(
@@ -78,6 +104,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+  navigatorKey: navigatorKey,
   title: 'Out of Mind',
   debugShowCheckedModeBanner: false,
   theme: ThemeData(

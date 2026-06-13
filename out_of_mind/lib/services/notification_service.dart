@@ -15,7 +15,13 @@ class NotificationService {
   static const int weeklyInsightId = 2;
   static const int _reminderIdOffset = 1000;
 
-static Future<void> initialize() async {
+  // Payload values used to route the user when they tap a notification.
+  static const String payloadPlanned = 'planned';
+  static const String payloadReflection = 'reflection';
+  static const String payloadInsight = 'insight';
+
+static Future<void> initialize(
+    {void Function(String? payload)? onTap}) async {
   tz_data.initializeTimeZones();
   try {
     final timezoneInfo = await FlutterTimezone.getLocalTimezone();
@@ -37,13 +43,26 @@ static Future<void> initialize() async {
     iOS: iosSettings,
   );
 
-  await _plugin.initialize(initSettings);
+  await _plugin.initialize(
+    initSettings,
+    onDidReceiveNotificationResponse: (response) =>
+        onTap?.call(response.payload),
+  );
 
   await _plugin
       .resolvePlatformSpecificImplementation
           <AndroidFlutterLocalNotificationsPlugin>()
       ?.requestNotificationsPermission();
 }
+
+  /// Payload of the notification that launched the app (cold start), if any.
+  static Future<String?> getLaunchPayload() async {
+    final details = await _plugin.getNotificationAppLaunchDetails();
+    if (details?.didNotificationLaunchApp ?? false) {
+      return details!.notificationResponse?.payload;
+    }
+    return null;
+  }
 
   static Future<void> scheduleReminder(
       int id, String itemName, DateTime date) async {
@@ -71,6 +90,7 @@ static Future<void> initialize() async {
         ),
         iOS: DarwinNotificationDetails(),
       ),
+      payload: payloadPlanned,
       androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime,
@@ -96,6 +116,7 @@ static Future<void> initialize() async {
       ),
       iOS: DarwinNotificationDetails(),
     ),
+    payload: payloadInsight,
   );
 }
 
@@ -113,15 +134,18 @@ static Future<void> scheduleWeeklyReflection(int weekday, TimeOfDay time) async 
     'Time to reflect on last week\'s spending 🧠',
     scheduled,
     const NotificationDetails(
+      // New channel id (v2): the original channel was created at default
+      // importance and Android won't upgrade an existing channel in place.
       android: AndroidNotificationDetails(
-        'weekly_reflection',
+        'weekly_reflection_v2',
         'Weekly Reflection Reminder',
         channelDescription: 'Weekly reminder to check your spending reflection',
-        importance: Importance.defaultImportance,
-        priority: Priority.defaultPriority,
+        importance: Importance.high,
+        priority: Priority.high,
       ),
       iOS: DarwinNotificationDetails(),
     ),
+    payload: payloadReflection,
     androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
     uiLocalNotificationDateInterpretation:
         UILocalNotificationDateInterpretation.absoluteTime,

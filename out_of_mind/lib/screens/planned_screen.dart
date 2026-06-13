@@ -122,7 +122,9 @@ class _PlannedScreenState extends State<PlannedScreen> {
       body: _planned.isEmpty
           ? const Center(child: Text('No wants yet.'))
           : ListView.builder(
-              padding: const EdgeInsets.all(16),
+              // Extra bottom padding so the FAB never covers the last card's
+              // action buttons.
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
               itemCount: _planned.length,
               itemBuilder: (context, index) {
                 final p = _planned[index];
