@@ -13,6 +13,7 @@ class NotificationService {
   // their DB row id + _reminderIdOffset so they can never collide with these.
   static const int weeklyReflectionId = 1;
   static const int weeklyInsightId = 2;
+  static const int locationAlertId = 3;
   static const int _reminderIdOffset = 1000;
 
   // Payload values used to route the user when they tap a notification.
@@ -156,4 +157,26 @@ static Future<void> scheduleWeeklyReflection(int weekday, TimeOfDay time) async 
 static Future<void> cancelWeeklyReflection() async {
   await _plugin.cancel(weeklyReflectionId);
 }
+
+  /// Fired when the user enters a tracked location.
+  /// Tapping the notification opens the Planned screen.
+  static Future<void> showLocationAlert(String locationName) async {
+    await _plugin.show(
+      locationAlertId,
+      'Impulse check 🧠',
+      "You're near $locationName — feeling an urge to buy something?",
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'location_alerts',
+          'Location Alerts',
+          channelDescription:
+              'Alerts when you enter tracked spending locations',
+          importance: Importance.high,
+          priority: Priority.high,
+        ),
+        iOS: DarwinNotificationDetails(),
+      ),
+      payload: payloadPlanned,
+    );
+  }
 }

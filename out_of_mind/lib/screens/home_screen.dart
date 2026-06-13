@@ -11,6 +11,7 @@ import 'edit_purchase_screen.dart';
 import '../constants/mood_emojis.dart';
 import '../services/currency_service.dart';
 import '../services/notification_service.dart';
+import 'locations_screen.dart';
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // Shell
@@ -61,6 +62,7 @@ class _HomeScreenState extends State<HomeScreen> {
           _HomeTab(onLoad: () => setState(() {})),
           _PlannedTab(key: _plannedKey),
           const _WinsTab(),
+          const LocationsScreen(),
         ],
       ),
       floatingActionButton: _tab == 1
@@ -90,6 +92,11 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: Icon(Icons.emoji_events_outlined),
             selectedIcon: Icon(Icons.emoji_events),
             label: 'Wins',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.location_on_outlined),
+            selectedIcon: Icon(Icons.location_on),
+            label: 'Locations',
           ),
         ],
       ),

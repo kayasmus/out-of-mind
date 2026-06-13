@@ -6,6 +6,7 @@ import 'screens/reflection_screen.dart';
 import 'screens/trends_screen.dart';
 import 'services/notification_service.dart';
 import 'services/currency_service.dart';
+import 'services/location_geofence_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'db/database_helper.dart';
 import 'models/purchase.dart';
@@ -95,6 +96,12 @@ void main() async {
   // Fire-and-forget: don't block startup on the insight computation.
   _sendWeeklyInsightIfNeeded().catchError(
       (Object e) => debugPrint('Weekly insight failed: $e'));
+
+  // Start geofencing after the first frame so the navigator is ready.
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    LocationGeofenceManager.instance.initialize().catchError(
+        (Object e) => debugPrint('Geofence init failed: $e'));
+  });
 }
 
 class MyApp extends StatelessWidget {

@@ -1,5 +1,6 @@
 import 'package:out_of_mind/models/planned_purchase.dart';
 import 'package:out_of_mind/models/purchase.dart';
+import 'package:out_of_mind/models/tracked_location.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -19,7 +20,7 @@ class DatabaseHelper {
     final path = join(await getDatabasesPath(), 'main_db.db');
     return await openDatabase(
       path,
-      version: 4,
+      version: 5,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -52,6 +53,16 @@ class DatabaseHelper {
         won_at TEXT
       )
     ''');
+    await db.execute('''
+      CREATE TABLE TrackedLocations (
+        id INTEGER PRIMARY KEY,
+        name TEXT,
+        latitude REAL,
+        longitude REAL,
+        radius_meters REAL DEFAULT 200,
+        created_at TEXT
+      )
+    ''');
   }
 
   Future _onUpgrade(Database db, int oldVersion, int newVersion) async {
@@ -68,6 +79,18 @@ class DatabaseHelper {
       await db.execute("ALTER TABLE Purchases ADD COLUMN tag TEXT DEFAULT 'Want'");
       await db.execute("ALTER TABLE Planned ADD COLUMN status TEXT DEFAULT 'active'");
       await db.execute('ALTER TABLE Planned ADD COLUMN won_at TEXT');
+    }
+    if (oldVersion < 5) {
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS TrackedLocations (
+          id INTEGER PRIMARY KEY,
+          name TEXT,
+          latitude REAL,
+          longitude REAL,
+          radius_meters REAL DEFAULT 200,
+          created_at TEXT
+        )
+      ''');
     }
   }
 
@@ -171,5 +194,25 @@ class DatabaseHelper {
       where: 'id = ?',
       whereArgs: [id],
     );
+  }
+
+  // ─── Tracked Locations ─────────────────────────────────────────────────────
+
+  Future<int> insertTrackedLocation(TrackedLocation loc) async {
+    final db = await instance.database;
+    return await db.insert('TrackedLocations', loc.toMap());
+  }
+
+  Future<List<TrackedLocation>> getTrackedLocations() async {
+    final db = await instance.database;
+    final maps =
+        await db.query('TrackedLocations', orderBy: 'created_at DESC');
+    return maps.map(TrackedLocation.fromMap).toList();
+  }
+
+  Future<int> deleteTrackedLocation(int id) async {
+    final db = await instance.database;
+    return await db.delete('TrackedLocations',
+        where: 'id = ?', whereArgs: [id]);
   }
 }

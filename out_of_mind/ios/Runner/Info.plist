@@ -4,6 +4,19 @@
 <dict>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
+	<!-- Location usage descriptions -->
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Out of Mind captures where you shop so you can track spending patterns.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Out of Mind uses your location in the background to remind you when you're near places where you tend to impulse buy.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>Out of Mind uses your location in the background to remind you when you're near places where you tend to impulse buy.</string>
+	<!-- Background location + fetch required for geofencing -->
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>location</string>
+		<string>fetch</string>
+	</array>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
