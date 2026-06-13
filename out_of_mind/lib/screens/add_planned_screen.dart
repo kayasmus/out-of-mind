@@ -18,6 +18,7 @@ class _AddPlannedScreenState extends State<AddPlannedScreen> {
   final TextEditingController amountController = TextEditingController();
   final TextEditingController notesController = TextEditingController();
   DateTime? reminderDate;
+  TimeOfDay reminderTime = const TimeOfDay(hour: 9, minute: 0);
   bool _saving = false;
 
   Future<void> _pickReminderDate() async {
@@ -27,7 +28,16 @@ class _AddPlannedScreenState extends State<AddPlannedScreen> {
       firstDate: DateTime.now(),
       lastDate: DateTime.now().add(const Duration(days: 365)),
     );
-    if (picked != null) setState(() => reminderDate = picked);
+    if (picked == null) return;
+    setState(() => reminderDate = picked);
+
+    // Immediately prompt for time after date is chosen.
+    if (!mounted) return;
+    final pickedTime = await showTimePicker(
+      context: context,
+      initialTime: reminderTime,
+    );
+    if (pickedTime != null) setState(() => reminderTime = pickedTime);
   }
 
  Future<void> _save() async {
@@ -42,7 +52,11 @@ class _AddPlannedScreenState extends State<AddPlannedScreen> {
     : null,
     mood: selectedMood!,
     notes: notesController.text.isNotEmpty ? notesController.text : null,
-    reminderDate: reminderDate?.toString(),
+    reminderDate: reminderDate == null
+        ? null
+        : DateTime(reminderDate!.year, reminderDate!.month, reminderDate!.day,
+                reminderTime.hour, reminderTime.minute)
+            .toString(),
     createdAt: DateTime.now().toString(),
   );
 
@@ -52,7 +66,7 @@ class _AddPlannedScreenState extends State<AddPlannedScreen> {
     // A scheduling failure should never block saving/navigation.
     try {
       await NotificationService.scheduleReminder(
-          id, planned.name, reminderDate!);
+          id, planned.name, reminderDate!, reminderTime);
     } catch (e) {
       debugPrint('Failed to schedule reminder: $e');
     }
@@ -103,8 +117,8 @@ class _AddPlannedScreenState extends State<AddPlannedScreen> {
             OutlinedButton(
               onPressed: _pickReminderDate,
               child: Text(reminderDate == null
-                  ? 'Set a reminder date (optional)'
-                  : 'Reminder: ${reminderDate!.toString().substring(0, 10)}'),
+                  ? 'Set a reminder (optional)'
+                  : 'Reminder: ${reminderDate!.toString().substring(0, 10)} at ${reminderTime.format(context)}'),
             ),
             const SizedBox(height: 16),
             SizedBox(

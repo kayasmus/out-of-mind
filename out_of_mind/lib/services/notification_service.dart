@@ -65,15 +65,15 @@ static Future<void> initialize(
   }
 
   static Future<void> scheduleReminder(
-      int id, String itemName, DateTime date) async {
+      int id, String itemName, DateTime date, TimeOfDay time) async {
     final scheduledDate = tz.TZDateTime(
-  tz.local,
-  date.year,
-  date.month,
-  date.day,
-  9,
-  0,
-);
+      tz.local,
+      date.year,
+      date.month,
+      date.day,
+      time.hour,
+      time.minute,
+    );
 
     await _plugin.zonedSchedule(
       _reminderIdOffset + id,

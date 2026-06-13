@@ -181,7 +181,14 @@ class _PlannedScreenState extends State<PlannedScreen> {
                         if (p.reminderDate != null) ...[
                           const SizedBox(height: 6),
                           Text(
-                            '🔔 Reminder: ${p.reminderDate!.substring(0, 10)}',
+                            () {
+                              final dt = DateTime.tryParse(p.reminderDate!);
+                              if (dt == null) return '🔔 Reminder: ${p.reminderDate!.substring(0, 10)}';
+                              final date = p.reminderDate!.substring(0, 10);
+                              final hour = dt.hour.toString().padLeft(2, '0');
+                              final minute = dt.minute.toString().padLeft(2, '0');
+                              return '🔔 Reminder: $date at $hour:$minute';
+                            }(),
                             style: const TextStyle(fontSize: 13),
                           ),
                         ],
