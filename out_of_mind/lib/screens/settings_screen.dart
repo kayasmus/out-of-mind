@@ -43,7 +43,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
     await prefs.setInt('reflection_hour', _reminderTime.hour);
     await prefs.setInt('reflection_minute', _reminderTime.minute);
     await prefs.setBool('reflection_set', true);
-    await NotificationService.scheduleWeeklyReflection(_reminderWeekday, _reminderTime);
+    try {
+      await NotificationService.scheduleWeeklyReflection(
+          _reminderWeekday, _reminderTime);
+    } catch (e) {
+      debugPrint('Failed to schedule weekly reflection: $e');
+    }
     setState(() => _reminderSet = true);
   }
 

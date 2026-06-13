@@ -18,6 +18,7 @@ class _AddPlannedScreenState extends State<AddPlannedScreen> {
   final TextEditingController amountController = TextEditingController();
   final TextEditingController notesController = TextEditingController();
   DateTime? reminderDate;
+  bool _saving = false;
 
   Future<void> _pickReminderDate() async {
     final picked = await showDatePicker(
@@ -30,7 +31,9 @@ class _AddPlannedScreenState extends State<AddPlannedScreen> {
   }
 
  Future<void> _save() async {
+  if (_saving) return;
   if (selectedMood == null || nameController.text.isEmpty) return;
+  setState(() => _saving = true);
 
   final planned = PlannedPurchase(
     name: nameController.text,
@@ -46,7 +49,13 @@ class _AddPlannedScreenState extends State<AddPlannedScreen> {
   final id = await DatabaseHelper.instance.insertPlanned(planned);
 
   if (reminderDate != null) {
-    await NotificationService.scheduleReminder(id, planned.name, reminderDate!);
+    // A scheduling failure should never block saving/navigation.
+    try {
+      await NotificationService.scheduleReminder(
+          id, planned.name, reminderDate!);
+    } catch (e) {
+      debugPrint('Failed to schedule reminder: $e');
+    }
   }
 
   if (mounted) Navigator.pop(context);
@@ -100,7 +109,10 @@ class _AddPlannedScreenState extends State<AddPlannedScreen> {
             const SizedBox(height: 16),
             SizedBox(
               width: double.infinity,
-              child: ElevatedButton(onPressed: _save, child: const Text('Save')),
+              child: ElevatedButton(
+                onPressed: _saving ? null : _save,
+                child: Text(_saving ? 'Saving…' : 'Save'),
+              ),
             ),
           ],
         ),

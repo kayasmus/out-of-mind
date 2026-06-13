@@ -18,6 +18,7 @@ class _AddPurchaseScreenState extends State<AddPurchaseScreen> {
   String? selectedMood;
   final TextEditingController amountController = TextEditingController();
   double _impulse = 3;
+  bool _saving = false;
 
   Future<String> _getLocation() async {
   bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
@@ -57,7 +58,11 @@ class _AddPurchaseScreenState extends State<AddPurchaseScreen> {
 }
 
   Future<void> _savePurchase() async {
+    if (_saving) return;
     if (selectedMood == null || amountController.text.isEmpty) return;
+    // The location fetch below can take seconds; without this guard a second
+    // tap on Save inserts a duplicate purchase.
+    setState(() => _saving = true);
 
     final location = await _getLocation().timeout(
     const Duration(seconds: 5),
@@ -124,7 +129,10 @@ Slider(
   },
 ),
             const SizedBox(height: 16),
-            ElevatedButton(onPressed: _savePurchase, child: const Text("Save")),
+            ElevatedButton(
+              onPressed: _saving ? null : _savePurchase,
+              child: Text(_saving ? 'Saving…' : 'Save'),
+            ),
           ],
         ),
       ),

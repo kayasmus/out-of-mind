@@ -71,7 +71,7 @@ static Future<void> initialize() async {
         ),
         iOS: DarwinNotificationDetails(),
       ),
-      androidScheduleMode: AndroidScheduleMode.inexact,
+      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime,
     );
@@ -122,7 +122,7 @@ static Future<void> scheduleWeeklyReflection(int weekday, TimeOfDay time) async 
       ),
       iOS: DarwinNotificationDetails(),
     ),
-    androidScheduleMode: AndroidScheduleMode.inexact,
+    androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
     uiLocalNotificationDateInterpretation:
         UILocalNotificationDateInterpretation.absoluteTime,
     matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
