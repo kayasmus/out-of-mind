@@ -269,9 +269,11 @@ class _PlannedScreenState extends State<PlannedScreen> {
                               ),
                             ),
                             const SizedBox(width: 8),
+                            // Confirm: bought it
                             IconButton(
                               icon: const Icon(Icons.check_circle_outline,
                                   color: Colors.green),
+                              tooltip: 'I bought it',
                               onPressed: () async {
                                 final confirm = await showDialog<bool>(
                                   context: context,
@@ -302,9 +304,30 @@ class _PlannedScreenState extends State<PlannedScreen> {
                                 }
                               },
                             ),
+                            // Resisted: it's a win!
+                            IconButton(
+                              icon: const Icon(Icons.emoji_events,
+                                  color: Colors.amber),
+                              tooltip: 'I resisted! 🏆',
+                              onPressed: () async {
+                                await DatabaseHelper.instance.markAsWon(p.id!);
+                                await NotificationService.cancelReminder(
+                                    p.id!);
+                                _load();
+                                if (!context.mounted) return;
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('🏆 Win recorded! Great self-control.'),
+                                    backgroundColor: Colors.amber,
+                                  ),
+                                );
+                              },
+                            ),
+                            // Delete: just remove
                             IconButton(
                               icon: const Icon(Icons.delete_outline,
                                   color: Colors.red),
+                              tooltip: 'Remove',
                               onPressed: () async {
                                 await DatabaseHelper.instance
                                     .deletePlanned(p.id!);

@@ -6,6 +6,8 @@ class PlannedPurchase {
   String? notes;
   String? reminderDate;
   String createdAt;
+  String status; // 'active', 'bought', 'won'
+  String? wonAt;
 
   PlannedPurchase({
     this.id,
@@ -15,6 +17,8 @@ class PlannedPurchase {
     this.notes,
     this.reminderDate,
     required this.createdAt,
+    this.status = 'active',
+    this.wonAt,
   });
 
   Map<String, dynamic> toMap() {
@@ -26,18 +30,22 @@ class PlannedPurchase {
       'notes': notes,
       'reminder_date': reminderDate,
       'created_at': createdAt,
+      'status': status,
+      'won_at': wonAt,
     };
   }
 
   factory PlannedPurchase.fromMap(Map<String, dynamic> map) {
     return PlannedPurchase(
       id: map['id'],
-      name: map['name'],
+      name: map['name'] ?? '',
       amount: map['amount'],
       mood: map['mood'] ?? '',
       notes: map['notes'],
       reminderDate: map['reminder_date'],
       createdAt: map['created_at'] ?? DateTime.now().toString(),
+      status: map['status'] ?? 'active',
+      wonAt: map['won_at'],
     );
   }
 }
